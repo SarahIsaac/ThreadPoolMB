@@ -159,32 +159,17 @@ image ThreadPoolByRow(TaskQueue &q)
 
 int main()
 {
-
-	//std::vector<double> times_2;
-	//for (int i = 0; i < 30; i++)
-	//{
-	//	double time = functionTimer([]() -> void {loopMandelBrotByPixel(); });
-	//	times_2.push_back(time);
-	//}
-
 	TaskQueue q(4);
-	image img = ThreadPoolByPixel(q);
-	std::ofstream os;
-	std::string filename = "threadpool_mandel.ppm";
 
-	std::vector<double> times;
-	for (int i = 0; i < 10; i++)
+	image test;
+	for (int i = 0; i < 5; i++)
 	{
-		double time = functionTimer([&q]()->void {ThreadPoolByPixel(q); });
+		q.set_task_size(512 * 512);
+		test = ThreadPoolByPixel(q);
 	}
 
-	writeImage(*&img, os, filename);
+	q.join();
 
-	image img2 = ThreadPoolByPixel(q);
-	std::ofstream os2;
-	std::string filename2 = "threadpool_mandel.ppm";
-
-	writeImage(*&img2, os2, filename2);
 
 	return 0;
 }

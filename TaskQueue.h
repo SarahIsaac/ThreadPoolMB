@@ -36,38 +36,44 @@ public:
 						while (tasks.empty())
 						{
 							taskAdded.wait(lock);
+							if (!continue_on) break;
 						}
-						func = tasks.front();
-						task_count--;
-						tasks.pop();
+						if (!continue_on || tasks.empty()) break;
+						if (!tasks.empty())
+						{
+							func = tasks.front();
+							task_count--;
+							tasks.pop();
+						}
 					}
-					func();
+					if (!tasks.empty())func();
 				}
 			});
 		}
 	}
 
-	~TaskQueue()
+	void join()
 	{
-		stop();
 		for (int i = 0; i < pool.size(); i++)
 		{
-			std::cout << ">>" << std::endl;
-			pool[i].detach();
-			//if (pool[i].joinable())
-			//{
-			//	std::cout << "joining" << std::endl;
-			//	pool[i].join();
-			//}
-			std::cout << i << std::endl;
+			if (pool[i].joinable())
+			{
+				stop();
+				pool[i].join();
+			}
 		}
-		std::cout << "should be done here" << std::endl;
+	}
+
+	~TaskQueue()
+	{
+
 	}
 
 	void stop()
 	{
 		std::lock_guard<std::mutex> l(m);
 		continue_on = false;
+		taskAdded.notify_all();
 	}
 
 	void set_task_size(int t)
@@ -80,13 +86,5 @@ public:
 		std::lock_guard<std::mutex> l(m);
 		tasks.push(task);
 		taskAdded.notify_one();
-	}
-
-	void clear()
-	{
-		while (!tasks.empty())
-		{
-			tasks.pop();
-		}
 	}
 };
