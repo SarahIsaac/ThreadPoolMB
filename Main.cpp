@@ -166,6 +166,13 @@ int main()
 		times.push_back(time);
 	}
 
+	double average = getAverage(times);
+	double std_dev = getStdDev(average, times);
+	std::cout << "ThreadPool w/ Tasks divided up by PIXEL" << std::endl;
+	std::cout << "Average time (in milliseconds): " << average << std::endl;
+	std::cout << "Standard Deviation: " << std_dev << std::endl;
+
+	//couldn't get this to work, ran out of time to work on it.
 	//for (int i = 0; i < 5; i++)
 	//{
 	//	q.set_task_size(512);
@@ -174,7 +181,6 @@ int main()
 	//}
 
 	q.join();
-	std::cout << "done" << std::endl;
 
 	return 0;
 }
