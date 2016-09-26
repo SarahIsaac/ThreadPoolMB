@@ -28,7 +28,7 @@ public:
 		for (int i = 0; i < num_threads; i++)
 		{
 			pool.emplace_back([&]() {
-				while (continue_on)
+				while (continue_on || !tasks.empty())
 				{
 					std::function<void(void)> func;
 					{
@@ -38,7 +38,7 @@ public:
 							taskAdded.wait(lock);
 							if (!continue_on) break;
 						}
-						if (!continue_on || tasks.empty()) break;
+						if (!continue_on && tasks.empty()) break;
 						if (!tasks.empty())
 						{
 							func = tasks.front();

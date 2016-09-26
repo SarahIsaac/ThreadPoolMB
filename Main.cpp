@@ -110,8 +110,6 @@ void MandelBrotInnards(float x, float y, int a, int b, image &img)
 
 image ThreadPoolByPixel(TaskQueue &q)
 {
-	long num_tasks = DIM * DIM;
-
 	std::vector<std::vector<Color>> img(DIM, std::vector<Color>(DIM));
 	{
 		for (int a = 0; a < DIM; a++)
@@ -135,17 +133,11 @@ void MandelBrotRow(float a, float x, image &img)
 		int iteration = doMandelbrot(x, y);
 		Color color = determineColor(iteration);
 		img[a][b] = color;
-		if (b == DIM - 1)
-		{
-			std::cout << "whatadfja;kldjf;a" << std::endl;
-		}
 	}
 }
 
 image ThreadPoolByRow(TaskQueue &q)
 {
-	long num_tasks = DIM * DIM;
-
 	std::vector<std::vector<Color>> img(DIM, std::vector<Color>(DIM));
 	{
 		for (int a = 0; a < DIM; a++)
@@ -161,15 +153,28 @@ int main()
 {
 	TaskQueue q(4);
 
-	image test;
+	image img = ThreadPoolByPixel(q);
+	std::ofstream os;
+	std::string filename = "threadpool_mandel.ppm";
+	writeImage(img, os, filename);
+
+	std::vector<double> times;
 	for (int i = 0; i < 5; i++)
 	{
 		q.set_task_size(512 * 512);
-		test = ThreadPoolByPixel(q);
+		double time = functionTimer([&q]()->void {ThreadPoolByPixel(q); });
+		times.push_back(time);
 	}
 
-	q.join();
+	//for (int i = 0; i < 5; i++)
+	//{
+	//	q.set_task_size(512);
+	//	ThreadPoolByRow(q);
+	//	std::cout << "done2 " << i << std::endl;
+	//}
 
+	q.join();
+	std::cout << "done" << std::endl;
 
 	return 0;
 }
